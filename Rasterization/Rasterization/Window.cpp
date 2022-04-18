@@ -8,4 +8,6 @@ void Window::imageShow(std::vector<Eigen::Vector3f>& frame_buffer) {
 	image.convertTo(image, CV_8UC3, 1.0f);
 	cv::cvtColor(image, image, cv::COLOR_RGB2BGR);
 	cv::imshow("image", image);
+	cv::waitKey(0);
+	cv::imwrite("output.png", image);
 }
