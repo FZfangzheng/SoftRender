@@ -1,9 +1,9 @@
 #include "Camera.h"
-Camera::Camera(Eigen::Vector3f eye_pos) {
+Camera::Camera(const Eigen::Vector3f& eye_pos) {
     this->Position = eye_pos;
 }
 
-Eigen::Matrix4f Camera::lookAt(Eigen::Vector3f eye_pos, Eigen::Vector3f lookat, Eigen::Vector3f upAxis) {
+Eigen::Matrix4f Camera::lookAt(const Eigen::Vector3f& eye_pos, const Eigen::Vector3f& lookat, const Eigen::Vector3f& upAxis) {
     this->Position = eye_pos;
     //构建平移矩阵，将相机移动到原点
     Eigen::Matrix4f translate;
@@ -34,7 +34,7 @@ Eigen::Matrix4f Camera::getViewMatrix() {
     return translate;
 }
 
-Eigen::Matrix4f Camera::getProjectionMatrix(float eye_fov, float aspect_ratio, float zNear, float zFar) {
+Eigen::Matrix4f Camera::getProjectionMatrix(const float eye_fov, const float aspect_ratio, const float zNear, const float zFar) {
     Eigen::Matrix4f persp_to_ortho;
     Eigen::Matrix4f ortho;
 

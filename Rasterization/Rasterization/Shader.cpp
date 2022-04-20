@@ -1,6 +1,6 @@
 #include "Shader.h"
 #include "Utils.h"
-void VertexShader::setMVPMatrix(Eigen::Matrix4f m, Eigen::Matrix4f v, Eigen::Matrix4f p) {
+void VertexShader::setMVPMatrix(const Eigen::Matrix4f& m, const Eigen::Matrix4f& v, const Eigen::Matrix4f& p) {
     model = m;
     view = v;
     projection = p;
@@ -67,7 +67,7 @@ std::array<Eigen::Vector3f, 3> VertexShader::use(Triangle* out, Triangle* in) {
     out->setColor(2, 148, 121.0, 92.0);
     return viewspace_pos;
 }
-void FragmentShader::setLight(PointLight& light) {
+void FragmentShader::setLight(const PointLight& light) {
     lights.push_back(light);
 }
 Eigen::Vector3f FragmentShader::use(const fragment_shader_payload& payload) {

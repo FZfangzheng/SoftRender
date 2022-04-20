@@ -16,10 +16,10 @@ Triangle::Triangle() {
     tex_coords[2] << 0.0, 0.0;
 }
 
-void Triangle::setVertex(int ind, Vector4f ver) {
+void Triangle::setVertex(int ind, const Vector4f& ver) {
     v[ind] = ver;
 }
-void Triangle::setNormal(int ind, Vector3f n) {
+void Triangle::setNormal(int ind, const Vector3f& n) {
     normal[ind] = n;
 }
 void Triangle::setColor(int ind, float r, float g, float b) {
@@ -34,7 +34,7 @@ void Triangle::setColor(int ind, float r, float g, float b) {
     color[ind] = Vector3f((float)r / 255., (float)g / 255., (float)b / 255.);
     return;
 }
-void Triangle::setTexCoord(int ind, Vector2f uv) {
+void Triangle::setTexCoord(int ind, const Vector2f& uv) {
     tex_coords[ind] = uv;
 }
 

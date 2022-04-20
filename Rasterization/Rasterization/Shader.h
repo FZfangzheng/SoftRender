@@ -29,7 +29,7 @@ public:
     // 返回观察空间的点坐标， out中修改屏幕空间点坐标，观察空间法线，设置初始颜色
     std::array<Eigen::Vector3f, 3> use(Triangle* out, Triangle* in);
     // 设置MVP矩阵
-    void setMVPMatrix(Eigen::Matrix4f m, Eigen::Matrix4f v, Eigen::Matrix4f p);
+    void setMVPMatrix(const Eigen::Matrix4f& m, const Eigen::Matrix4f& v, const Eigen::Matrix4f& p);
     // 设置远近平面
     void setZNearAndZFar(float zNear, float zFar);
 private:
@@ -48,7 +48,7 @@ public:
     // Blinn-Phong光照模型
     Eigen::Vector3f use(const fragment_shader_payload& payload);
     // 设置光源
-    void setLight(PointLight& light);
+    void setLight(const PointLight& light);
 private:
     std::vector<PointLight> lights;
 };

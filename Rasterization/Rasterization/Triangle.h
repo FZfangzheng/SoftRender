@@ -19,13 +19,13 @@ public:
     Eigen::Vector4f b() const { return v[1]; }
     Eigen::Vector4f c() const { return v[2]; }
 
-    void setVertex(int ind, Vector4f ver);
-    void setNormal(int ind, Vector3f n); 
+    void setVertex(int ind, const Vector4f& ver);
+    void setNormal(int ind, const Vector3f& n); 
     void setColor(int ind, float r, float g, float b);
 
     void setNormals(const std::array<Vector3f, 3>& normals);
     void setColors(const std::array<Vector3f, 3>& colors);
-    void setTexCoord(int ind, Vector2f uv);
+    void setTexCoord(int ind, const Vector2f& uv);
     std::array<Vector4f, 3> toVector4() const;
 };
 
