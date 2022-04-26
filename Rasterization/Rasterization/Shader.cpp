@@ -70,12 +70,23 @@ std::array<Eigen::Vector3f, 3> VertexShader::use(Triangle* out, Triangle* in) {
 void FragmentShader::setLight(const PointLight& light) {
     lights.push_back(light);
 }
+void FragmentShader::setAmbLightIntensity(const Vector3f amb) {
+    amb_light_intensity = amb;
+}
+void FragmentShader::setSampleType(const SampleType sampleType) {
+    sampletype = sampleType;
+}
 Eigen::Vector3f FragmentShader::use(const fragment_shader_payload& payload) {
     Eigen::Vector3f return_color = { 0, 0, 0 };
     if (payload.texture)
     {
         // 获取纹理坐标的颜色
-        return_color = payload.texture->getColor(payload.tex_coords.x(), payload.tex_coords.y());
+        if (sampletype == UV) {
+            return_color = payload.texture->getColor(payload.tex_coords.x(), payload.tex_coords.y());
+        }
+        else {
+            return_color = payload.texture->getColor_XY(payload.tex_coords.x(), payload.tex_coords.y());
+        }
     }
     Eigen::Vector3f texture_color;
     texture_color << return_color.x(), return_color.y(), return_color.z();
@@ -84,8 +95,7 @@ Eigen::Vector3f FragmentShader::use(const fragment_shader_payload& payload) {
     Eigen::Vector3f kd = texture_color / 255.f;
     Eigen::Vector3f ks = Eigen::Vector3f(0.7937, 0.7937, 0.7937);
 
-    Eigen::Vector3f amb_light_intensity{ 10, 10, 10 };
-    Eigen::Vector3f eye_pos{ 0, 0, 10 };
+    Eigen::Vector3f eye_pos{ 0, 0, 0 };
 
     float p = 150;
 

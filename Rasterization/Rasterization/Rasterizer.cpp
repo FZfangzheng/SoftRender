@@ -131,6 +131,21 @@ static std::tuple<float, float, float> computeBarycentric2D(float x, float y, co
     return { c1,c2,c3 };
 }
 // 绘制过程，调用顶点着色器和片元着色器（rasterize_triangle）
+void rst::rasterizer::draw() {
+    // 遍历unordered_map obj_map
+    for (auto& kv : obj_map) {
+        for (const auto& t : kv.second)
+        {
+            //newtri为屏幕空间三角形数据
+            Triangle newtri = *t;
+            //返回观察空间的点位置,同时顶点着色器处理三角形数据
+            std::array<Eigen::Vector3f, 3> viewspace_pos = vertex_shader_map[kv.first].use(&newtri, t);
+            // 光栅化显示三角形
+            rasterize_triangle(kv.first, newtri, viewspace_pos);
+        }
+    }
+}
+// 绘制过程，调用顶点着色器和片元着色器（rasterize_triangle）
 void rst::rasterizer::draw(std::vector<Triangle*>& TriangleList) {
     for (const auto& t : TriangleList)
     {
@@ -158,7 +173,64 @@ static Eigen::Vector2f interpolate(float alpha, float beta, float gamma, const E
 
     return Eigen::Vector2f(u, v);
 }
+//光栅化三角形，内部调用片元着色器
+//t包含屏幕空间三角形的坐标、观察空间法线、默认颜色，view_pos为观察空间三角形点坐标
+void rst::rasterizer::rasterize_triangle(int idx, const Triangle& t, const std::array<Eigen::Vector3f, 3>& view_pos)
+{
+    auto v = t.toVector4();
+    // 三角形三个点
+    Vector4f A = v[0];
+    Vector4f B = v[1];
+    Vector4f C = v[2];
+    // bounding box
+    float minX = std::min(A[0], std::min(B[0], C[0]));
+    float maxX = std::max(A[0], std::max(B[0], C[0]));
+    float minY = std::min(A[1], std::min(B[1], C[1]));
+    float maxY = std::max(A[1], std::max(B[1], C[1]));
+    // 取整
+    int minX_i = static_cast<int>(std::floor(minX));
+    int maxX_i = static_cast<int>(std::ceil(maxX));
+    int minY_i = static_cast<int>(std::floor(minY));
+    int maxY_i = static_cast<int>(std::ceil(maxY));
+    // 遍历bounding box 里的点
+    for (int x = std::max(minX_i, 0); x <= std::min(maxX_i, width - 1); ++x) {
+        for (int y = std::max(minY_i, 1); y <= std::min(maxY_i, height); ++y) {
+            if (insideTriangle(static_cast<float>(x) + 0.5, static_cast<float>(y) + 0.5, t.v)) {
+                //获取重心插值
+                auto tup = computeBarycentric2D(static_cast<float>(x) + 0.5, static_cast<float>(y) + 0.5, t.v);
+                float alpha;
+                float beta;
+                float gamma;
+                std::tie(alpha, beta, gamma) = tup;
+                float Z = 1.0 / (alpha / v[0].w() + beta / v[1].w() + gamma / v[2].w());
+                float zp = alpha * v[0].z() / v[0].w() + beta * v[1].z() / v[1].w() + gamma * v[2].z() / v[2].w();
+                zp *= Z;
+                // 判断深度是否大于现有深度，是则说明应该显示
+                if (zp > depth_buf[get_index(x, y)]) {
+                    // color
+                    auto interpolated_color = interpolate(alpha, beta, gamma, t.color[0], t.color[1], t.color[2], 1);
+                    // normal
+                    auto interpolated_normal = interpolate(alpha, beta, gamma, t.normal[0], t.normal[1], t.normal[2], 1).normalized();
+                    // texcoords
+                    auto interpolated_texcoords = interpolate(alpha, beta, gamma, t.tex_coords[0], t.tex_coords[1], t.tex_coords[2], 1);
+                    // shadingcoords
+                    auto interpolated_shadingcoords = interpolate(alpha, beta, gamma, view_pos[0], view_pos[1], view_pos[2], 1);
 
+                    // 用来传递插值结果的结构体
+                    fragment_shader_payload payload(interpolated_color, interpolated_normal, interpolated_texcoords, texture_map[idx] ? &*texture_map[idx] : nullptr);
+                    payload.view_pos = interpolated_shadingcoords;
+                    //调用片元着色器
+                    auto pixel_color = fragment_shader_map[idx].use(payload);
+                    // 设置深度
+                    depth_buf[get_index(x, y)] = zp;
+                    // 设置颜色
+                    set_pixel(Eigen::Vector2i(x, y), pixel_color);
+                }
+            }
+        }
+    }
+
+}
 //光栅化三角形，内部调用片元着色器
 //t包含屏幕空间三角形的坐标、观察空间法线、默认颜色，view_pos为观察空间三角形点坐标
 void rst::rasterizer::rasterize_triangle(const Triangle& t, const std::array<Eigen::Vector3f, 3>& view_pos)
@@ -242,10 +314,12 @@ rst::rasterizer::rasterizer(int w, int h) : width(w), height(h)
 int rst::rasterizer::get_index(int x, int y)
 {
     return (height - y) * width + x;
+    //return x + y * width;
 }
 // 填充帧缓冲
 void rst::rasterizer::set_pixel(const Vector2i& point, const Eigen::Vector3f& color)
 {
+    //int ind = point.x() + point.y() * width;
     int ind = (height - point.y()) * width + point.x();
     frame_buf[ind] = color;
 }
@@ -258,5 +332,15 @@ void rst::rasterizer::set_vertex_shader(const VertexShader& vs)
 void rst::rasterizer::set_fragment_shader(const FragmentShader& fs)
 {
     fragment_shader = fs;
+}
+// 设置顶点着色器
+void rst::rasterizer::set_vertex_shader(int idx, const VertexShader& vs)
+{
+    vertex_shader_map.emplace(idx, vs);
+}
+// 设置片元着色器
+void rst::rasterizer::set_fragment_shader(int idx, const FragmentShader& fs)
+{
+    fragment_shader_map.emplace(idx, fs);
 }
 

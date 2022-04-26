@@ -1,6 +1,7 @@
 #pragma once
 #include <Eigen/SVD>
 #include <Eigen/Core>
+#include "global.h"
 class Utils {
 public:
 	//绕x角度，绕y轴角度，绕z轴角度，缩放比例，位移

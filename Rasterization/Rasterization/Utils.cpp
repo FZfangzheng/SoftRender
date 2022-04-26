@@ -1,5 +1,4 @@
 #include "Utils.h"
-#include "global.h"
 Eigen::Vector4f Utils::to_vec4(const Eigen::Vector3f& v3, float w) {
     return Eigen::Vector4f(v3.x(), v3.y(), v3.z(), w);
 }
@@ -38,6 +37,6 @@ Eigen::Matrix4f Utils::getModelMatrix(float angleX, float angleY, float angleZ, 
         0, 1, 0, move[1],
         0, 0, 1, move[2],
         0, 0, 0, 1;
-    delete move;
+    //delete move;
     return translate * rotation * scale;
 }

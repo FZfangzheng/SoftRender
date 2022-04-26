@@ -4,7 +4,10 @@
 #include "Light.h"
 #include "Triangle.h"
 
-
+enum SampleType {
+    XY,
+    UV
+};
 struct fragment_shader_payload
 {
     fragment_shader_payload()
@@ -49,6 +52,12 @@ public:
     Eigen::Vector3f use(const fragment_shader_payload& payload);
     // 设置光源
     void setLight(const PointLight& light);
+    // 设置环境光亮度
+    void setAmbLightIntensity(const Vector3f amb);
+    // 设置sample type
+    void setSampleType(const SampleType sampleType);
 private:
     std::vector<PointLight> lights;
+    SampleType sampletype = UV;
+    Eigen::Vector3f amb_light_intensity = { 10,10,10 };
 };
