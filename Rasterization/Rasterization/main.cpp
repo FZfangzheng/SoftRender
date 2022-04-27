@@ -77,10 +77,11 @@ int main(int argc, const char** argv)
     fs3.setSampleType(XY);
 
     // MVPæÿ’Û
-    float m1_move[3] = { -1,0,0 };
+    float m1_move[3] = { -1,1,0 };
     Eigen::Matrix4f m = Utils::getModelMatrix(0, 140, 0, 1.5, m1_move);
-    float m2_move[3] = { 1,0,0 };
+    float m2_move[3] = { 1,1,0 };
     Eigen::Matrix4f m2 = Utils::getModelMatrix(45, 140, 0, 1, m2_move);
+    //Eigen::Matrix4f m2 = Utils::getModelMatrix(0, 0, 0, 1, new float[3]());
     Eigen::Matrix4f m3 = Utils::getModelMatrix(0, 0, 0, 1, new float[3]());
     Eigen::Matrix4f v = myCamera.lookAt(eye_pos, lookat, upAxis);
     Eigen::Matrix4f p = myCamera.getProjectionMatrix(45.0, 1, -0.1, -50);
