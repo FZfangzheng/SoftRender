@@ -18,6 +18,6 @@
   
   结果图：
   
-  ![rasterization](https://github.com/FZfangzheng/SoftRender/image/rasterization.png)
+  ![rasterization](https://raw.githubusercontent.com/FZfangzheng/SoftRender/main/image/rasterization.png)
   
 - ### 光追（待续）
